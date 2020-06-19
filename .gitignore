@@ -55,8 +55,8 @@ thumbs.db
 node_modules
 old/
 *-old/
-*-notrack/
-no-track/
+*_notrack/
+no_track/
 build/
 combo/
 reference/

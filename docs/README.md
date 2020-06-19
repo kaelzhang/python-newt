@@ -3,9 +3,11 @@
 [![](https://img.shields.io/pypi/v/newt.svg)](https://pypi.org/project/newt/)
 [![](https://img.shields.io/pypi/l/newt.svg)](https://github.com/kaelzhang/python-newt)
 
-# newt
+# [newt](https://github.com/kaelzhang/python-newt)
 
-Thread-safe, mixed sync-async queue for Python
+Thread-safe, mixed sync-async queue for Python.
+
+Heavily based on [janus](https://github.com/aio-libs/janus), but [newt](https://github.com/kaelzhang/python-newt) initializes event loop much lazily which makes the queue much more flexible.
 
 ## Install
 
@@ -16,7 +18,13 @@ $ pip install newt
 ## Usage
 
 ```py
-import newt
+import asyncio
+
+from newt import Queue
+
+queue = Queue()
+
+def thread():
 ```
 
 ## License
