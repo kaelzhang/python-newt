@@ -14,7 +14,7 @@ from typing import (
 
 from .common import (
     T,
-    lazy,
+    lazy_property,
     has_loop,
     get_running_loop
 )
@@ -45,7 +45,7 @@ class AbstractQueue(Generic[T]):
         self._closing = False
         self._pending = set()  # type: Set[asyncio.Future[Any]]
 
-    @lazy
+    @lazy_property
     def _loop(self) -> asyncio.AbstractEventLoop:
         return get_running_loop()
 

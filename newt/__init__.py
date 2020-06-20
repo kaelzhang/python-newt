@@ -5,7 +5,7 @@ from typing import (
 
 from .common import (
     T,
-    lazy
+    lazy_property
 )
 from .queue import AbstractQueue
 from .proxy_sync import SyncQueueProxy
@@ -17,22 +17,22 @@ __version__ = '0.0.1'
 
 
 class Queue(AbstractQueue[T]):
-    @lazy
+    @lazy_property
     def sync_q(self) -> SyncQueueProxy[T]:
         return SyncQueueProxy(self)
 
-    @lazy
+    @lazy_property
     def async_q(self) -> AsyncQueueProxy[T]:
         return AsyncQueueProxy(self)
 
 
 class PriorityQueue(Queue[T]):
-    '''Variant of Queue that retrieves open entries in priority order
+    """Variant of Queue that retrieves open entries in priority order
     (lowest first).
 
     Entries are typically tuples of the form:  (priority number, data).
 
-    '''
+    """
 
     _heap_queue: List[T]
 
@@ -50,7 +50,7 @@ class PriorityQueue(Queue[T]):
 
 
 class LifoQueue(Queue[T]):
-    '''Variant of Queue that retrieves most recently added entries first.'''
+    """Variant of Queue that retrieves most recently added entries first."""
 
     def _qsize(self) -> int:
         return len(self._queue)

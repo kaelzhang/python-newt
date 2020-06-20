@@ -11,10 +11,10 @@ from .queue import AbstractQueue
 
 
 class SyncQueueProxy(Generic[T]):
-    '''Create a queue object with a given maximum size.
+    """Create a queue object with a given maximum size.
 
     If maxsize is <= 0, the queue size is infinite.
-    '''
+    """
 
     def __init__(
         self,
@@ -32,7 +32,7 @@ class SyncQueueProxy(Generic[T]):
 
     @check_closing
     def task_done(self) -> None:
-        '''Indicate that a formerly enqueued task is complete.
+        """Indicate that a formerly enqueued task is complete.
 
         Used by Queue consumer threads.  For each get() used to fetch a task,
         a subsequent call to task_done() tells the queue that the processing
@@ -44,7 +44,7 @@ class SyncQueueProxy(Generic[T]):
 
         Raises a ValueError if called more times than there were items
         placed in the queue.
-        '''
+        """
 
         with self._parent._all_tasks_done:
             unfinished = self._parent._unfinished_tasks - 1
@@ -57,25 +57,25 @@ class SyncQueueProxy(Generic[T]):
             self._parent._unfinished_tasks = unfinished
 
     def join(self) -> None:
-        '''Blocks until all items in the Queue have been gotten and processed.
+        """Blocks until all items in the Queue have been gotten and processed.
 
         The count of unfinished tasks goes up whenever an item is added to the
         queue. The count goes down whenever a consumer thread calls task_done()
         to indicate the item was retrieved and all work on it is complete.
 
         When the count of unfinished tasks drops to zero, join() unblocks.
-        '''
+        """
         with self._parent._all_tasks_done:
             while self._parent._unfinished_tasks:
                 self._parent._all_tasks_done.wait()
 
     def qsize(self) -> int:
-        '''Return the approximate size of the queue (not reliable!).'''
+        """Return the approximate size of the queue (not reliable!)."""
         return self._parent._qsize()
 
     @property
     def unfinished_tasks(self) -> int:
-        '''Return the number of unfinished tasks.'''
+        """Return the number of unfinished tasks."""
         return self._parent._unfinished_tasks
 
     @check_closing
@@ -85,7 +85,7 @@ class SyncQueueProxy(Generic[T]):
         block: bool = True,
         timeout: OptInt = None
     ) -> None:
-        '''Put an item into the queue.
+        """Put an item into the queue.
 
         If optional args 'block' is true and 'timeout' is None (the default),
         block if necessary until a free slot is available. If 'timeout' is
@@ -94,7 +94,7 @@ class SyncQueueProxy(Generic[T]):
         Otherwise ('block' is false), put an item on the queue if a free slot
         is immediately available, else raise the Full exception ('timeout'
         is ignored in that case).
-        '''
+        """
 
         with self._parent._sync_not_full:
             if self._parent._maxsize > 0:
@@ -124,7 +124,7 @@ class SyncQueueProxy(Generic[T]):
         block: bool = True,
         timeout: OptInt = None
     ) -> T:
-        '''Remove and return an item from the queue.
+        """Remove and return an item from the queue.
 
         If optional args 'block' is true and 'timeout' is None (the default),
         block if necessary until an item is available. If 'timeout' is
@@ -133,7 +133,7 @@ class SyncQueueProxy(Generic[T]):
         Otherwise ('block' is false), return an item if one is immediately
         available, else raise the Empty exception ('timeout' is ignored
         in that case).
-        '''
+        """
 
         with self._parent._sync_not_empty:
             if not block:

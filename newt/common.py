@@ -10,9 +10,9 @@ T = TypeVar('T')
 OptInt = Optional[int]
 
 
-def lazy(fn: Callable[..., T]):
-    '''
-    '''
+def lazy_property(fn: Callable[..., T]):
+    """Lazily initialize a property
+    """
     def helper(self, *args, **kwargs) -> T:
         name = fn.__name__
         key = f'_{name}'
@@ -29,9 +29,9 @@ def lazy(fn: Callable[..., T]):
 
 
 def has_loop(fn):
-    '''
+    """
     Only execute fn when there is a loop
-    '''
+    """
     def helper(self, *args, **kwargs) -> None:
         if self.__loop is None:
             return

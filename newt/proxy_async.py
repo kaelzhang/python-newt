@@ -10,10 +10,10 @@ from .queue import AbstractQueue
 
 
 class AsyncQueueProxy(Generic[T]):
-    '''Create a queue object with a given maximum size.
+    """Create a queue object with a given maximum size.
 
     If maxsize is <= 0, the queue size is infinite.
-    '''
+    """
 
     def __init__(self, parent: AbstractQueue[T]):
         self._parent = parent
@@ -28,28 +28,13 @@ class AsyncQueueProxy(Generic[T]):
 
     @property
     def unfinished_tasks(self) -> int:
-        '''Return the number of unfinished tasks.'''
+        """Return the number of unfinished tasks."""
         return self._parent._unfinished_tasks
 
     @property
     def maxsize(self) -> int:
         """Number of items allowed in the queue."""
         return self._parent._maxsize
-
-    # def empty(self) -> bool:
-    #     """Return True if the queue is empty, False otherwise."""
-    #     return self.qsize() == 0
-
-    # def full(self) -> bool:
-    #     """Return True if there are maxsize items in the queue.
-
-    #     Note: if the Queue was initialized with maxsize=0 (the default),
-    #     then full() is never True.
-    #     """
-    #     if self._parent._maxsize <= 0:
-    #         return False
-    #     else:
-    #         return self.qsize() >= self._parent._maxsize
 
     @check_closing
     async def put(self, item: T) -> None:
