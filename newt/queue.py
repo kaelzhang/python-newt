@@ -1,4 +1,8 @@
 import asyncio
+from asyncio import (
+    AbstractEventLoop,
+    Future
+)
 import threading
 from abc import ABC, abstractmethod
 
@@ -6,7 +10,9 @@ from typing import (
     Generic,
     Any,
     Set,
-    Callable
+    Callable,
+    Optional,
+    Awaitable
 )
 
 from .common import (
@@ -18,7 +24,11 @@ from .common import (
 
 
 class AbstractQueue(Generic[T], ABC):
+    _loop_: Optional[AbstractEventLoop]
+    _pending: Set[Future]
+
     def __init__(self, maxsize: int = 0) -> None:
+        self._loop_ = None
         self._maxsize = maxsize
 
         self._init(maxsize)
@@ -41,7 +51,7 @@ class AbstractQueue(Generic[T], ABC):
         self._finished.set()
 
         self._closing = False
-        self._pending = set()  # type: Set[asyncio.Future[Any]]
+        self._pending = set()
 
     @lazy_property
     def _loop(self) -> asyncio.AbstractEventLoop:
@@ -58,7 +68,7 @@ class AbstractQueue(Generic[T], ABC):
         # Nobody should put/get at this point,
         # so lock acquiring is not required
         if not self._closing:
-            raise RuntimeError("Waiting for non-closed queue")
+            raise RuntimeError("waiting for non-closed queue")
         # give execution chances for the task-done callbacks
         # of async tasks created inside
         # _notify_async_not_empty, _notify_async_not_full

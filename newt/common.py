@@ -13,10 +13,11 @@ OptInt = Optional[int]
 def lazy_property(fn: Callable[..., T]):
     """Lazily initialize a property
     """
-    def helper(self, *args, **kwargs) -> T:
-        name = fn.__name__
-        key = f'_{name}'
 
+    name = fn.__name__
+    key = f'{name}_'
+
+    def helper(self, *args, **kwargs) -> T:
         value = getattr(self, key, None)
 
         if value is None:
@@ -33,7 +34,7 @@ def has_loop(fn):
     Only execute fn when there is a loop
     """
     def helper(self, *args, **kwargs) -> None:
-        if self.__loop is None:
+        if self._loop_ is None:
             return
 
         fn(self, *args, **kwargs)
