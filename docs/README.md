@@ -17,12 +17,16 @@ $ pip install newt
 
 ## Usage
 
+### Run thread in an executor
+
 ```py
 import asyncio
 
 from newt import Queue
 
 queue = Queue()
+
+loop = asyncio.get_event_loop()
 
 def threaded(q):
     for i in range(100):
@@ -37,15 +41,15 @@ async def coroutine(q):
 
 
 async def main():
-    loop = asyncio.get_running_loop()
-    fut = loop.run_in_executor(None, threaded, queue.sync_q)
+    future = loop.run_in_executor(None, threaded, queue.sync_q)
     await coroutine(queue.async_q)
-    await fut
+    await future
 
     queue.close()
     await queue.wait_closed()
 
-asyncio.run(main())
+loop.run_util_complete(main())
+loop.close()
 ```
 
 ## License
