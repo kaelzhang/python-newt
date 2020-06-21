@@ -1,7 +1,10 @@
 from heapq import heappop, heappush
 from typing import (
-    List
+    List,
+    Deque
 )
+
+from collections import deque
 
 from .common import (
     T,
@@ -11,19 +14,41 @@ from .queue import AbstractQueue
 from .proxy_sync import SyncQueueProxy
 from .proxy_async import AsyncQueueProxy
 
+__all__ = (
+    'Queue',
+    'PriorityQueue',
+    'LifoQueue'
+)
+
 
 # The first beta version
 __version__ = '0.0.1'
 
 
 class Queue(AbstractQueue[T]):
-    @lazy_property
-    def sync_q(self) -> SyncQueueProxy[T]:
-        return SyncQueueProxy(self)
+    _queue: Deque
 
-    @lazy_property
-    def async_q(self) -> AsyncQueueProxy[T]:
-        return AsyncQueueProxy(self)
+    def _init(self, maxsize: int) -> None:
+        self._queue = deque()
+
+    def _qsize(self) -> int:
+        return len(self._queue)
+
+    # Put a new item in the queue
+    def _put(self, item: T) -> None:
+        self._queue.append(item)
+
+    # Get an item from the queue
+    def _get(self) -> T:
+        return self._queue.popleft()
+
+    # @lazy_property
+    # def sync_q(self) -> SyncQueueProxy[T]:
+    #     return SyncQueueProxy(self)
+
+    # @lazy_property
+    # def async_q(self) -> AsyncQueueProxy[T]:
+    #     return AsyncQueueProxy(self)
 
 
 class PriorityQueue(Queue[T]):
