@@ -45,7 +45,6 @@ async def main():
     queue.close()
     await queue.wait_closed()
 
-
 asyncio.run(main())
 ```
 

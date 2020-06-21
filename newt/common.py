@@ -51,16 +51,6 @@ def check_closing(fn: Callable[..., T]):
     return helper
 
 
-if getattr(asyncio, 'get_running_loop', None) is None:
-    def _get_running_loop() -> asyncio.AbstractEventLoop:
-        loop = asyncio.get_event_loop()
-
-        if not loop.is_running():
-            raise RuntimeError('no running event loop')
-
-        return loop
-
-    get_running_loop = _get_running_loop
-
-else:
-    get_running_loop = asyncio.get_running_loop
+get_running_loop = asyncio.get_event_loop \
+    if getattr(asyncio, 'get_running_loop', None) is None \
+    else asyncio.get_running_loop

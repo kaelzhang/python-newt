@@ -15,7 +15,10 @@ class AsyncQueueProxy(Generic[T]):
     If maxsize is <= 0, the queue size is infinite.
     """
 
-    def __init__(self, parent: AbstractQueue[T]):
+    def __init__(
+        self,
+        parent: AbstractQueue[T]
+    ) -> None:
         self._parent = parent
 
     @property
@@ -70,21 +73,21 @@ class AsyncQueueProxy(Generic[T]):
                 if locked:
                     self._parent._sync_mutex.release()
 
-    # @check_closing
-    # def put_nowait(self, item: T) -> None:
-    #     """Put an item into the queue without blocking.
+    @check_closing
+    def put_nowait(self, item: T) -> None:
+        """Put an item into the queue without blocking.
 
-    #     If no free slot is immediately available, raise QueueFull.
-    #     """
+        If no free slot is immediately available, raise QueueFull.
+        """
 
-    #     with self._parent._sync_mutex:
-    #         if self._parent._maxsize > 0:
-    #             if self._parent._qsize() >= self._parent._maxsize:
-    #                 raise QueueFull
+        with self._parent._sync_mutex:
+            if self._parent._maxsize > 0:
+                if self._parent._qsize() >= self._parent._maxsize:
+                    raise QueueFull
 
-    #         self._parent._put_internal(item)
-    #         self._parent._notify_async_not_empty(threadsafe=False)
-    #         self._parent._notify_sync_not_empty()
+            self._parent._put_internal(item)
+            self._parent._notify_async_not_empty(threadsafe=False)
+            self._parent._notify_sync_not_empty()
 
     @check_closing
     async def get(self) -> T:
@@ -118,20 +121,20 @@ class AsyncQueueProxy(Generic[T]):
                 if locked:
                     self._parent._sync_mutex.release()
 
-    # def get_nowait(self) -> T:
-    #     """Remove and return an item from the queue.
+    def get_nowait(self) -> T:
+        """Remove and return an item from the queue.
 
-    #     Return an item if one is immediately available, else raise QueueEmpty.
-    #     """
+        Return an item if one is immediately available, else raise QueueEmpty.
+        """
 
-    #     with self._parent._sync_mutex:
-    #         if self._parent._qsize() == 0:
-    #             raise QueueEmpty
+        with self._parent._sync_mutex:
+            if self._parent._qsize() == 0:
+                raise QueueEmpty
 
-    #         item = self._parent._get()
-    #         self._parent._notify_async_not_full(threadsafe=False)
-    #         self._parent._notify_sync_not_full()
-    #         return item
+            item = self._parent._get()
+            self._parent._notify_async_not_full(threadsafe=False)
+            self._parent._notify_sync_not_full()
+            return item
 
     @check_closing
     def task_done(self) -> None:

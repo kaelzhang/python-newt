@@ -172,9 +172,12 @@ class AbstractQueue(Generic[T], ABC):
         try:
             self._loop.call_soon_threadsafe(callback, *args)
         except RuntimeError:
-            # swallowing agreed in #2
             pass
 
-    def _call_soon(self, callback: Callable[..., None], *args: Any) -> None:
+    def _call_soon(
+        self,
+        callback: Callable[..., None],
+        *args: Any
+    ) -> None:
         if not self._loop.is_closed():
             self._loop.call_soon(callback, *args)

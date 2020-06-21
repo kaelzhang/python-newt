@@ -19,7 +19,7 @@ class SyncQueueProxy(Generic[T]):
     def __init__(
         self,
         parent: AbstractQueue[T]
-    ):
+    ) -> None:
         self._parent = parent
 
     @property
