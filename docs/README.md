@@ -17,36 +17,65 @@ $ pip install newt
 
 ## Usage
 
-### Run thread in an executor
+Suppose there is a threaded target function which produces items, and a coroutine which consumes items.
+
+```py
+from newt import Queue
+
+
+def threaded(sync_queue):
+    for i in range(100):
+        sync_queue.put(i)
+    sync_queue.join()
+```
+
+`sync_queue` follows the interface of Python built-in [synchronized queue class](https://docs.python.org/3/library/queue.html)
+
+```py
+async def coroutine(async_queue):
+    for i in range(100):
+        assert await async_queue.get() == i
+        async_queue.task_done()
+```
+
+`async_queue` follows the vanilla Python [`asyncio.Queue`](https://docs.python.org/3/library/asyncio-queue.html)
+
+### Thread in an executor -> Coroutine
+
+The following example shows how to produce item in a thread which executed in the executor, and consume the item in a coroutine.
 
 ```py
 import asyncio
 
-from newt import Queue
-
-queue = Queue()
-
 loop = asyncio.get_event_loop()
-
-def threaded(q):
-    for i in range(100):
-        q.put(i)
-    q.join()
-
-
-async def coroutine(q):
-    for i in range(100):
-        assert await q.get() == i
-        q.task_done()
 
 
 async def main():
-    future = loop.run_in_executor(None, threaded, queue.sync_q)
-    await coroutine(queue.async_q)
+    future = loop.run_in_executor(None, threaded, queue.sync_queue)
+    await coroutine(queue.async_queue)
     await future
 
     queue.close()
     await queue.wait_closed()
+
+loop.run_until_complete(main())
+```
+
+### Normal thread -> Coroutine
+
+`newt.Queue` also supports to produce item in a normal threading,
+
+```py
+loop = asyncio.get_event_loop()
+
+
+async def main():
+    await coroutine(queue.async_queue)
+    queue.close()
+    await queue.wait_closed()
+
+t = threading.Thread(target=threaded, args=(queue.sync_queue,))
+t.start()
 
 loop.run_until_complete(main())
 ```

@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import time
 
 from newt import Queue
 
@@ -53,5 +54,7 @@ def test_threading_with_coroutine():
 
     t = threading.Thread(target=threaded, args=(queue.sync_q,))
     t.start()
+
+    time.sleep(.1)
 
     loop.run_until_complete(main())
