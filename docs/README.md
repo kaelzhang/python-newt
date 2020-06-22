@@ -48,8 +48,7 @@ async def main():
     queue.close()
     await queue.wait_closed()
 
-loop.run_util_complete(main())
-loop.close()
+loop.run_until_complete(main())
 ```
 
 ## License

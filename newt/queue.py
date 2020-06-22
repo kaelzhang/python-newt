@@ -42,7 +42,16 @@ class AbstractQueue(Generic[T], ABC):
         self._sync_not_full = threading.Condition(sync_mutex)
         self._all_tasks_done = threading.Condition(sync_mutex)
 
-        async_mutex = asyncio.Lock()
+        try:
+            async_mutex = asyncio.Lock()
+        except RuntimeError as e:
+            raise RuntimeError(f'''{e}
+
+This is usually not an issue of newt.
+You should make sure there is a event loop in the current thread, especially after running `asyncio.run()`.
+
+Check https://github.com/kaelzhang/python-newt for details.''')
+
         self._async_mutex = async_mutex
 
         self._async_not_empty = asyncio.Condition(async_mutex)
