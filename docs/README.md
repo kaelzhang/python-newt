@@ -5,9 +5,15 @@
 
 # [newt](https://github.com/kaelzhang/python-newt)
 
+<img align="right" alt="" src="https://raw.githubusercontent.com/kaelzhang/python-newt/master/newt.png" />
+
 Thread-safe, mixed-threading-and-asyncio, producer-consumer queue for Python.
 
-Heavily based on [janus](https://github.com/aio-libs/janus), but [newt](https://github.com/kaelzhang/python-newt) lazily initializes event loop which makes the queue much more flexible.
+Heavily based on [janus](https://github.com/aio-libs/janus), but [newt](https://github.com/kaelzhang/python-newt) lazily initializes event loop which makes the queue much more flexible:
+
+- `newt.Queue` could be initialized outside subthread or coroutine
+- supports information exchange between a thread and a coroutine
+- ensures thread-safety
 
 ## Install
 
