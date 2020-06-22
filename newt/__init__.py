@@ -22,7 +22,7 @@ __all__ = (
 
 
 # The first beta version
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 
 class _AbstractQueue(AbstractQueue[T]):

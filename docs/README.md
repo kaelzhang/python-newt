@@ -5,7 +5,7 @@
 
 # [newt](https://github.com/kaelzhang/python-newt)
 
-<img align="right" alt="" src="https://raw.githubusercontent.com/kaelzhang/python-newt/master/newt.png" />
+<img align="right" alt="" width="256" height="256" src="https://raw.githubusercontent.com/kaelzhang/python-newt/master/newt.png" />
 
 Thread-safe, mixed-threading-and-asyncio, producer-consumer queue for Python.
 
