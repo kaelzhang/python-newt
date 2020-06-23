@@ -27,11 +27,11 @@ __version__ = '0.0.4'
 
 class _AbstractQueue(AbstractQueue[T]):
     @lazy_property
-    def sync_q(self) -> SyncQueueProxy[T]:
+    def sync_queue(self) -> SyncQueueProxy[T]:
         return SyncQueueProxy(self)
 
     @lazy_property
-    def async_q(self) -> AsyncQueueProxy[T]:
+    def async_queue(self) -> AsyncQueueProxy[T]:
         return AsyncQueueProxy(self)
 
 

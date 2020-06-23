@@ -28,7 +28,7 @@ settings = dict(
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     python_requires='>=3.7',
-    install_requires=read_requirements('requirements.txt'),
+    # install_requires=read_requirements('requirements.txt'),
     tests_require=read_requirements('test-requirements.txt'),
     classifiers=[
         'Topic :: Software Development :: Libraries :: Python Modules',
