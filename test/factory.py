@@ -12,7 +12,7 @@ def async_producer(sleep_on_every, sleep):
             if (i + 1) % sleep_on_every == 0:
                 await asyncio.sleep(sleep)
 
-        queue.join()
+        await queue.join()
 
     return p
 

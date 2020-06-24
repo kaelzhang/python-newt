@@ -42,7 +42,7 @@ def run_thread_and_coroutine(
     async def main():
         await consumer(queue.async_queue)
         queue.close()
-        queue.wait_closed()
+        await queue.wait_closed()
 
     threading.Thread(target=producer, args=(queue.sync_queue,)).start()
 
@@ -58,7 +58,7 @@ def run_coroutine_and_thread(
     async def main():
         await producer(queue.async_queue)
         queue.close()
-        queue.wait_closed()
+        await queue.wait_closed()
 
     threading.Thread(target=consumer, args=(queue.sync_queue,)).start()
 
@@ -66,14 +66,17 @@ def run_coroutine_and_thread(
     loop.run_until_complete(main())
 
 
-def create_runner(producer_async, consumer_async):
-    if producer_async:
-        if consumer_async:
+def create_runner(
+    producer_is_async: bool,
+    consumer_is_async: bool
+):
+    if producer_is_async:
+        if consumer_is_async:
             return run_two_coroutines
         else:
             return run_coroutine_and_thread
     else:
-        if consumer_async:
+        if consumer_is_async:
             return run_thread_and_coroutine
         else:
             return run_two_threads
