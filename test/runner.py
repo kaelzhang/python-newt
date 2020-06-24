@@ -2,36 +2,36 @@ import threading
 import asyncio
 
 
-def run_two_threads(
-    queue,
-    producer,
-    consumer,
-):
-    sync_queue = queue.sync_queue
-    threading.Thread(target=producer, args=(sync_queue,)).start()
-    threading.Thread(target=consumer, args=(sync_queue,)).start()
+# def run_two_threads(
+#     queue,
+#     producer,
+#     consumer,
+# ):
+#     sync_queue = queue.sync_queue
+#     threading.Thread(target=producer, args=(sync_queue,)).start()
+#     threading.Thread(target=consumer, args=(sync_queue,)).start()
 
 
-def run_two_coroutines(
-    queue,
-    producer,
-    consumer
-):
-    loop = asyncio.get_event_loop()
-    async_queue = queue.async_queue
+# def run_two_coroutines(
+#     queue,
+#     producer,
+#     consumer
+# ):
+#     loop = asyncio.get_event_loop()
+#     async_queue = queue.async_queue
 
-    async def main():
-        loop = asyncio.get_event_loop()
+#     async def main():
+#         loop = asyncio.get_event_loop()
 
-        task1 = loop.create_task(producer(async_queue))
-        task2 = loop.create_task(consumer(async_queue))
+#         task1 = loop.create_task(producer(async_queue))
+#         task2 = loop.create_task(consumer(async_queue))
 
-        await asyncio.wait([
-            task1,
-            task2
-        ])
+#         await asyncio.wait([
+#             task1,
+#             task2
+#         ])
 
-    loop.run_until_complete(main())
+#     loop.run_until_complete(main())
 
 
 def run_thread_and_coroutine(
@@ -67,16 +67,9 @@ def run_coroutine_and_thread(
 
 
 def create_runner(
-    producer_is_async: bool,
-    consumer_is_async: bool
+    producer_is_async: bool
 ):
     if producer_is_async:
-        if consumer_is_async:
-            return run_two_coroutines
-        else:
-            return run_coroutine_and_thread
+        return run_coroutine_and_thread
     else:
-        if consumer_is_async:
-            return run_thread_and_coroutine
-        else:
-            return run_two_threads
+        return run_thread_and_coroutine

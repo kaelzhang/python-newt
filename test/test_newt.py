@@ -1,48 +1,65 @@
 import pytest
+import itertools
+from typing import (
+    Tuple,
+    Union
+)
 
-from newt import Queue
+from newt import (
+    LifoQueue,
+    PriorityQueue,
+    Queue
+)
 
 from .runner import create_runner
 from .factory import create
 
 
-def map_args(queue, producer_options, consumer_options):
-    if type(producer_options) is bool:
-        producer_options = {
-            'is_async': producer_options
+def map_options(options: Union[dict, bool]) -> dict:
+    if type(options) is bool:
+        return {
+            'is_async': options
         }
 
-    if type(consumer_options) is bool:
-        consumer_options = {
-            'is_async': consumer_options
-        }
-
-    return (queue, producer_options, consumer_options)
+    return options
 
 
-CASES = [
-    (Queue(), True, False),
-    (Queue(), False, True)
-]
+def map_two_options(l: list):
+    return [
+        (map_options(a), map_options(b))
+        for a, b in l
+    ]
 
 
 @pytest.mark.parametrize(
-    'queue,producer_options,consumer_options', [
-        map_args(*c)
-        for c in CASES
-    ]
+    'queue_ctor,max_size,options',
+    itertools.product(
+        [
+            Queue,
+            PriorityQueue,
+            # LifoQueue
+        ],
+        [-1, 2],
+        map_two_options([
+            (True, False),
+            (False, True)
+        ])
+    )
 )
 def test_newt(
-    queue,
-    producer_options: dict,
-    consumer_options: dict
+    queue_ctor,
+    max_size: int,
+    options: Tuple[dict, dict]
 ):
+    queue = queue_ctor(max_size)
+
+    producer_options, consumer_options = options
+
     producer_is_async = producer_options.get('is_async', False)
-    consumer_is_async = consumer_options.get('is_async', False)
 
     producer = create(**producer_options)
     consumer = create(**consumer_options)
 
-    runner = create_runner(producer_is_async, consumer_is_async)
+    runner = create_runner(producer_is_async)
 
     runner(queue, producer, consumer)
