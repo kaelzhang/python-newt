@@ -36,7 +36,6 @@ def async_consumer(
             await asyncio.sleep(init_delay)
 
         for i, item in enumerate(sequence):
-            print(i, item)
             assert await queue.get() == item
 
             if (i + 1) % sleep_on_every == 0:
@@ -106,7 +105,7 @@ def create(
         if is_async:
             factory = async_producer
         else:
-            factory = sync_consumer
+            factory = sync_producer
 
     return factory(
         sleep_on_every,

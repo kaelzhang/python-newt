@@ -31,8 +31,8 @@ def map_options(options: Union[dict, bool], consumer: bool) -> dict:
 def map_two_options(l: list):
     return [
         (
-            map_options(False, a),
-            map_options(True, b)
+            map_options(a, False),
+            map_options(b, True)
         )
         for a, b in l
     ]
@@ -63,7 +63,10 @@ def run(
         [
             Queue
         ],
-        [-1, 2],
+        [
+            -1,
+            # 2
+        ],
         map_two_options([
             (True, False),
             (False, True),

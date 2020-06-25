@@ -44,11 +44,12 @@ def run_thread_and_coroutine(
         queue.close()
         await queue.wait_closed()
 
-    threading.Thread(target=producer, args=(queue.sync_queue,)).start()
+    x = threading.Thread(target=producer, args=(queue.sync_queue,))
+    x.start()
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-
+    x.join()
 
 def run_coroutine_and_thread(
     queue,
