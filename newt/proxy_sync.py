@@ -118,6 +118,9 @@ class SyncQueueProxy(Generic[T]):
             self._parent._sync_not_empty.notify()
             self._parent._notify_async_not_empty(threadsafe=True)
 
+    def put_nowait(self, item) -> None:
+        self.put(item, False)
+
     @check_closing
     def get(
         self,
@@ -156,3 +159,6 @@ class SyncQueueProxy(Generic[T]):
             self._parent._sync_not_full.notify()
             self._parent._notify_async_not_full(threadsafe=True)
             return item
+
+    def get_nowait(self) -> T:
+        return self.get(False)

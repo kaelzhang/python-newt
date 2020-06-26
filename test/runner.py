@@ -68,7 +68,7 @@ def run_coroutine_and_thread(
 
 
 def create_runner(
-    producer_is_async: bool
+    producer_is_async: bool = False
 ):
     if producer_is_async:
         return run_coroutine_and_thread
