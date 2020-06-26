@@ -77,7 +77,7 @@ Check https://github.com/kaelzhang/python-newt for details.''')
         # Nobody should put/get at this point,
         # so lock acquiring is not required
         if not self._closing:
-            raise RuntimeError("waiting for non-closed queue")
+            raise RuntimeError('waiting for non-closed queue')
         # give execution chances for the task-done callbacks
         # of async tasks created inside
         # _notify_async_not_empty, _notify_async_not_full
