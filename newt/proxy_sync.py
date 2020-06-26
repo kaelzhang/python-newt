@@ -24,59 +24,44 @@ class SyncQueueProxy(Generic[T]):
 
     @property
     def maxsize(self) -> int:
+        """Number of items allowed in the queue.
+        """
+
         return self._parent._maxsize
 
-    @property
-    def closed(self) -> bool:
-        return self._parent.closed
-
-    @check_closing
-    def task_done(self) -> None:
-        """Indicate that a formerly enqueued task is complete.
-
-        Used by Queue consumer threads.  For each get() used to fetch a task,
-        a subsequent call to task_done() tells the queue that the processing
-        on the task is complete.
-
-        If a join() is currently blocking, it will resume when all items
-        have been processed (meaning that a task_done() call was received
-        for every item that had been put() into the queue).
-
-        Raises a ValueError if called more times than there were items
-        placed in the queue.
-        """
-
-        with self._parent._all_tasks_done:
-            unfinished = self._parent._unfinished_tasks - 1
-            if unfinished <= 0:
-                if unfinished < 0:
-                    raise ValueError('task_done() called too many times')
-                self._parent._all_tasks_done.notify_all()
-                self._parent._loop.call_soon_threadsafe(
-                    self._parent._finished.set)
-            self._parent._unfinished_tasks = unfinished
-
-    def join(self) -> None:
-        """Blocks until all items in the Queue have been gotten and processed.
-
-        The count of unfinished tasks goes up whenever an item is added to the
-        queue. The count goes down whenever a consumer thread calls task_done()
-        to indicate the item was retrieved and all work on it is complete.
-
-        When the count of unfinished tasks drops to zero, join() unblocks.
-        """
-        with self._parent._all_tasks_done:
-            while self._parent._unfinished_tasks:
-                self._parent._all_tasks_done.wait()
-
     def qsize(self) -> int:
-        """Return the approximate size of the queue (not reliable!)."""
+        """Return the approximate size of the queue.
+
+        Note, qsize() > 0 doesn’t guarantee that a subsequent
+        `get()` will not block,
+        nor will `qsize()` < maxsize guarantee that `put()` will not block.
+        """
+
         return self._parent._qsize()
 
-    @property
-    def unfinished_tasks(self) -> int:
-        """Return the number of unfinished tasks."""
-        return self._parent._unfinished_tasks
+    def empty(self) -> bool:
+        """Return `True` if the queue is empty, `False` otherwise.
+
+        If `empty()` returns `True` it doesn’t guarantee that
+        a subsequent call to `put()` will not block.
+
+        Similarly, if `empty()` returns `False` it doesn’t guarantee that
+        a subsequent call to `get()` will not block.
+        """
+
+        return not self._parent._qsize()
+
+    def full(self) -> bool:
+        """Return `True` if the queue is full, `False` otherwise.
+
+        If `full()` returns `True` it doesn’t guarantee that
+        a subsequent call to `get()` will not block.
+
+        Similarly, if `full()` returns False it doesn’t guarantee that
+        a subsequent call to `put()` will not block.
+        """
+
+        return 0 < self._parent._maxsize <= self._parent._qsize()
 
     @check_closing
     def put(
@@ -120,6 +105,47 @@ class SyncQueueProxy(Generic[T]):
 
     def put_nowait(self, item) -> None:
         self.put(item, False)
+
+    @check_closing
+    def task_done(self) -> None:
+        """Indicate that a formerly enqueued task is complete.
+
+        Used by Queue consumer threads.  For each get() used to fetch a task,
+        a subsequent call to task_done() tells the queue that the processing
+        on the task is complete.
+
+        If a join() is currently blocking, it will resume when all items
+        have been processed (meaning that a task_done() call was received
+        for every item that had been put() into the queue).
+
+        Raises a ValueError if called more times than there were items
+        placed in the queue.
+        """
+
+        with self._parent._all_tasks_done:
+            unfinished = self._parent._unfinished_tasks - 1
+            if unfinished <= 0:
+                if unfinished < 0:
+                    raise ValueError('task_done() called too many times')
+                self._parent._all_tasks_done.notify_all()
+                self._parent._loop.call_soon_threadsafe(
+                    self._parent._finished.set)
+            self._parent._unfinished_tasks = unfinished
+
+    def join(self) -> None:
+        """Blocks until all items in the Queue have been gotten and processed.
+
+        The count of unfinished tasks goes up whenever an item is added to the
+        queue. The count goes down whenever a consumer thread calls
+        `task_done()` to indicate the item was retrieved and all work on
+        it is complete.
+
+        When the count of unfinished tasks drops to zero, `join()` unblocks.
+        """
+
+        with self._parent._all_tasks_done:
+            while self._parent._unfinished_tasks:
+                self._parent._all_tasks_done.wait()
 
     @check_closing
     def get(

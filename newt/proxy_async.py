@@ -23,12 +23,15 @@ class AsyncQueueProxy(Generic[T]):
 
     @property
     def maxsize(self) -> int:
-        """Number of items allowed in the queue."""
+        """Number of items allowed in the queue.
+        """
+
         return self._parent._maxsize
 
     def empty(self) -> bool:
         """Return `True` if the queue is empty, `False` otherwise.
         """
+
         return self.qsize() == 0
 
     def full(self) -> bool:
@@ -37,6 +40,7 @@ class AsyncQueueProxy(Generic[T]):
         If the queue was initialized with `maxsize=0` (the default),
         then `full()` never returns `True`.
         """
+
         if self._parent._maxsize <= 0:
             return False
         else:
@@ -97,6 +101,7 @@ class AsyncQueueProxy(Generic[T]):
         indicate that the item was retrieved and all work on it is complete.
         When the count of unfinished tasks drops to zero, `join()` unblocks.
         """
+
         while True:
             with self._parent._sync_mutex:
                 if self._parent._unfinished_tasks == 0:
@@ -162,16 +167,15 @@ class AsyncQueueProxy(Generic[T]):
     def task_done(self) -> None:
         """Indicate that a formerly enqueued task is complete.
 
-        Used by queue consumers. For each get() used to fetch a task,
-        a subsequent call to task_done() tells the queue that the processing
+        Used by queue consumers. For each `get()` used to fetch a task,
+        a subsequent call to `task_done()` tells the queue that the processing
         on the task is complete.
 
-        If a join() is currently blocking, it will resume when all items have
-        been processed (meaning that a task_done() call was received for every
-        item that had been put() into the queue).
+        If a `join()` is currently blocking, it will resume when all items have
+        been processed (meaning that a `task_done()` call was received for every item that had been `put()` into the queue).
 
-        Raises ValueError if called more times than there were items placed in
-        the queue.
+        Raises `ValueError` if called more times than there were items
+        placed in the queue.
         """
 
         with self._parent._all_tasks_done:
