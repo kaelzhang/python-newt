@@ -32,9 +32,9 @@ class SyncQueueProxy(Generic[T]):
     def qsize(self) -> int:
         """Return the approximate size of the queue.
 
-        Note, qsize() > 0 doesn’t guarantee that a subsequent
-        `get()` will not block,
-        nor will `qsize()` < maxsize guarantee that `put()` will not block.
+        Note, qsize() > 0 doesn’t guarantee that a subsequent `get()` will not
+        block, nor will `qsize()` < maxsize guarantee that `put()` will not
+        block.
         """
 
         return self._parent._qsize()
@@ -70,14 +70,17 @@ class SyncQueueProxy(Generic[T]):
         block: bool = True,
         timeout: OptInt = None
     ) -> None:
-        """Put an item into the queue.
+        """Put item into the queue.
 
-        If optional args 'block' is true and 'timeout' is None (the default),
-        block if necessary until a free slot is available. If 'timeout' is
-        a non-negative number, it blocks at most 'timeout' seconds and raises
-        the Full exception if no free slot was available within that time.
-        Otherwise ('block' is false), put an item on the queue if a free slot
-        is immediately available, else raise the Full exception ('timeout'
+        If optional args `block` is `True` and `timeout` is `None`
+        (the default), block if necessary until a free slot is available.
+
+        If `timeout` is a positive number, it blocks at most timeout seconds
+        and raises the Full exception if no free slot was available within
+        that time.
+
+        Otherwise (`block` is `False`), put an item on the queue if a free
+        slot is immediately available, else raise the Full exception (timeout
         is ignored in that case).
         """
 
@@ -104,21 +107,69 @@ class SyncQueueProxy(Generic[T]):
             self._parent._notify_async_not_empty(threadsafe=True)
 
     def put_nowait(self, item) -> None:
+        """Equivalent to `put(item, False)`.
+        """
+
         self.put(item, False)
+
+    @check_closing
+    def get(
+        self,
+        block: bool = True,
+        timeout: OptInt = None
+    ) -> T:
+        """Remove and return an item from the queue.
+
+        If optional args `block` is `True` and `timeout` is `None` (the
+        default), block if necessary until an item is available.
+
+        If `timeout` is a positive number, it blocks at most timeout seconds
+        and raises the `Empty` exception if no item was available within that
+        time.
+
+        Otherwise (`block` is `False`), return an item if one is immediately
+        available, else raise the `Empty` exception (timeout is ignored in
+        that case).
+        """
+
+        with self._parent._sync_not_empty:
+            if not block:
+                if not self._parent._qsize():
+                    raise Empty
+            elif timeout is None:
+                while not self._parent._qsize():
+                    self._parent._sync_not_empty.wait()
+            elif timeout < 0:
+                raise ValueError("'timeout' must be a non-negative number")
+            else:
+                time = self._parent._loop.time
+                endtime = time() + timeout
+                while not self._parent._qsize():
+                    remaining = endtime - time()
+                    if remaining <= 0.0:
+                        raise Empty
+                    self._parent._sync_not_empty.wait(remaining)
+            item = self._parent._get()
+            self._parent._sync_not_full.notify()
+            self._parent._notify_async_not_full(threadsafe=True)
+            return item
+
+    def get_nowait(self) -> T:
+        return self.get(False)
 
     @check_closing
     def task_done(self) -> None:
         """Indicate that a formerly enqueued task is complete.
 
         Used by Queue consumer threads.  For each get() used to fetch a task,
-        a subsequent call to task_done() tells the queue that the processing
+        a subsequent call to `task_done()` tells the queue that the processing
         on the task is complete.
 
-        If a join() is currently blocking, it will resume when all items
-        have been processed (meaning that a task_done() call was received
-        for every item that had been put() into the queue).
+        If a `join()` is currently blocking, it will resume when all items
+        have been processed (meaning that a `task_done()` call was received
+        for every item that had been `put()` into the queue).
 
-        Raises a ValueError if called more times than there were items
+        Raises a `ValueError` if called more times than there were items
         placed in the queue.
         """
 
@@ -146,45 +197,3 @@ class SyncQueueProxy(Generic[T]):
         with self._parent._all_tasks_done:
             while self._parent._unfinished_tasks:
                 self._parent._all_tasks_done.wait()
-
-    @check_closing
-    def get(
-        self,
-        block: bool = True,
-        timeout: OptInt = None
-    ) -> T:
-        """Remove and return an item from the queue.
-
-        If optional args 'block' is true and 'timeout' is None (the default),
-        block if necessary until an item is available. If 'timeout' is
-        a non-negative number, it blocks at most 'timeout' seconds and raises
-        the Empty exception if no item was available within that time.
-        Otherwise ('block' is false), return an item if one is immediately
-        available, else raise the Empty exception ('timeout' is ignored
-        in that case).
-        """
-
-        with self._parent._sync_not_empty:
-            if not block:
-                if not self._parent._qsize():
-                    raise Empty
-            elif timeout is None:
-                while not self._parent._qsize():
-                    self._parent._sync_not_empty.wait()
-            elif timeout < 0:
-                raise ValueError("'timeout' must be a non-negative number")
-            else:
-                time = self._parent._loop.time
-                endtime = time() + timeout
-                while not self._parent._qsize():
-                    remaining = endtime - time()
-                    if remaining <= 0.0:
-                        raise Empty
-                    self._parent._sync_not_empty.wait(remaining)
-            item = self._parent._get()
-            self._parent._sync_not_full.notify()
-            self._parent._notify_async_not_full(threadsafe=True)
-            return item
-
-    def get_nowait(self) -> T:
-        return self.get(False)
