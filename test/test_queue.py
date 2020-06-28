@@ -28,13 +28,13 @@ def map_options(options: Union[dict, bool], consumer: bool) -> dict:
     }
 
 
-def map_two_options(l: list):
+def map_two_options(lst: list):
     return [
         (
             map_options(a, False),
             map_options(b, True)
         )
-        for a, b in l
+        for a, b in lst
     ]
 
 
@@ -99,6 +99,7 @@ priority_queue_sequence = [
     (6, 5),
     (3, 2),
 ]
+
 
 @pytest.mark.parametrize(
     'queue_ctor,max_size,options',

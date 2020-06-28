@@ -33,6 +33,7 @@ def has_loop(fn):
     """
     Only execute fn when there is a loop
     """
+
     def helper(self, *args, **kwargs) -> None:
         if self._loop_ is None:
             return

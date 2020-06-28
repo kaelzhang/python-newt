@@ -11,8 +11,7 @@ from typing import (
     Any,
     Set,
     Callable,
-    Optional,
-    Awaitable
+    Optional
 )
 
 from .common import (

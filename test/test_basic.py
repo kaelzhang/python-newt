@@ -1,4 +1,3 @@
-import pytest
 from newt import (
     Queue
 )

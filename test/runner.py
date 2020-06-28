@@ -51,6 +51,7 @@ def run_thread_and_coroutine(
     loop.run_until_complete(main())
     x.join()
 
+
 def run_coroutine_and_thread(
     queue,
     producer,
