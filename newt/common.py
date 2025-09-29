@@ -11,7 +11,8 @@ OptInt = Optional[int]
 
 
 def lazy_property(fn: Callable[..., T]):
-    """Lazily initialize a property
+    """
+    Lazily initialize a property, and make sure the getter function only runs once.
     """
 
     name = fn.__name__
@@ -53,6 +54,8 @@ def check_closing(fn: Callable[..., T]):
     return helper
 
 
-get_running_loop = asyncio.get_event_loop \
-    if getattr(asyncio, 'get_running_loop', None) is None \
+get_running_loop = (
+    asyncio.get_event_loop
+    if getattr(asyncio, 'get_running_loop', None) is None
     else asyncio.get_running_loop
+)

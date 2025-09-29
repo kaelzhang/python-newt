@@ -129,9 +129,9 @@ Check https://github.com/kaelzhang/python-newt for details.''')
 
     # Utilities for async queue to notify sync queue
     # --------------------------------------------------------------
-
-    # This method is always called in a event loop,
+    # This methods are always called in a event loop,
     # so we do not need to check loop initialization
+
     def _notify_sync_not_empty(self) -> None:
         def f() -> None:
             with self._sync_mutex:
