@@ -1,5 +1,6 @@
 import threading
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 
 # def run_two_threads(
@@ -44,12 +45,18 @@ def run_thread_and_coroutine(
         queue.close()
         await queue.wait_closed()
 
-    x = threading.Thread(target=producer, args=(queue.sync_queue,))
-    x.start()
+    # Use ThreadPoolExecutor to automatically capture thread exceptions
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        # Submit producer to thread pool
+        future = executor.submit(producer, queue.sync_queue)
 
-    loop = asyncio.new_event_loop()
-    loop.run_until_complete(main())
-    x.join()
+        # Run the async consumer
+        loop = asyncio.new_event_loop()
+        try:
+            loop.run_until_complete(main())
+        finally:
+            # Wait for thread completion and get any exception
+            future.result()  # This will re-raise any exception from the thread
 
 
 def run_coroutine_and_thread(
@@ -62,10 +69,14 @@ def run_coroutine_and_thread(
         queue.close()
         await queue.wait_closed()
 
-    threading.Thread(target=consumer, args=(queue.sync_queue,)).start()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(consumer, queue.sync_queue)
 
-    loop = asyncio.new_event_loop()
-    loop.run_until_complete(main())
+        loop = asyncio.new_event_loop()
+        try:
+            loop.run_until_complete(main())
+        finally:
+            future.result()
 
 
 def create_runner(

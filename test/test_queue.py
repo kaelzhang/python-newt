@@ -16,7 +16,7 @@ from .factory import create
 
 
 def map_options(options: Union[dict, bool], consumer: bool) -> dict:
-    if type(options) is bool:
+    if isinstance(options, bool):
         return {
             'consumer': consumer,
             'is_async': options
@@ -65,7 +65,7 @@ def run(
         ],
         [
             -1,
-            # 2
+            2
         ],
         map_two_options([
             (True, False),
