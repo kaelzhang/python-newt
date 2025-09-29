@@ -47,7 +47,7 @@ def run_thread_and_coroutine(
     x = threading.Thread(target=producer, args=(queue.sync_queue,))
     x.start()
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.run_until_complete(main())
     x.join()
 
@@ -64,7 +64,7 @@ def run_coroutine_and_thread(
 
     threading.Thread(target=consumer, args=(queue.sync_queue,)).start()
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.run_until_complete(main())
 
 

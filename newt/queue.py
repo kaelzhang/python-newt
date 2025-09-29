@@ -43,6 +43,8 @@ class AbstractQueue(Generic[T], ABC):
 
         try:
             async_mutex = asyncio.Lock()
+
+        # This will not throw an error since Python 3.10
         except RuntimeError as e:
             raise RuntimeError(f'''{e}
 

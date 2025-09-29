@@ -1,5 +1,6 @@
 import pytest
 import asyncio
+import sys
 
 from newt import (
     Queue
@@ -27,9 +28,13 @@ def test_modify_closed_queue():
             consumer
         )
 
-
+# Only test this in Python < 3.10
+@pytest.mark.skipif(
+    sys.version_info >= (3, 10),
+    reason='Python >= 3.10 does not throw an error'
+)
 def test_init_fail():
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     asyncio.set_event_loop(None)
 
     with pytest.raises(
